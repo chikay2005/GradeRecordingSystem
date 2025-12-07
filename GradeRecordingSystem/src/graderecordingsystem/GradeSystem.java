@@ -16,11 +16,13 @@ public class GradeSystem {
     private static AuthService auth = new AuthService();
     private static GradeService gradeService = new GradeService();
 
+    // Predefined subjects
     private static final String[] subjects = {"Math", "Science", "English", "History", "PE"};
 
     public static void main(String[] args) {
         System.out.println("=== Grade Recording System ===");
 
+        // Load existing data
         gradeService.loadFromFile();
 
         while (true) {
@@ -32,9 +34,9 @@ public class GradeSystem {
             switch (choice) {
                 case 1 -> login();
                 case 2 -> register();
-                case 3 -> { 
-                    System.out.println("Goodbye!"); 
-                    System.exit(0); 
+                case 3 -> {
+                    System.out.println("Goodbye!");
+                    System.exit(0);
                 }
                 default -> System.out.println("Invalid choice.");
             }
@@ -138,43 +140,53 @@ public class GradeSystem {
         System.out.print("Enter Student ID to add/update grade: ");
         String id = sc.nextLine().trim();
         StudentRecord s = service.findById(id);
-        if (s == null) { 
-            System.out.println("Student not found."); 
-            return; 
+        if (s == null) {
+            System.out.println("Student not found.");
+            return;
         }
 
-        // Show subjects
-        System.out.println("=== Subjects ===");
-        for (int i = 0; i < subjects.length; i++)
-            System.out.printf("[%d] %s%n", i + 1, subjects[i]);
-
-        int subjChoice;
         while (true) {
-            System.out.print("Choose subject (number): ");
-            try {
-                subjChoice = Integer.parseInt(sc.nextLine());
-                if (subjChoice < 1 || subjChoice > subjects.length) throw new NumberFormatException();
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid choice.");
-            }
-        }
-        String subject = subjects[subjChoice - 1];
+            // Show subjects
+            System.out.println("\n=== Subjects ===");
+            for (int i = 0; i < subjects.length; i++)
+                System.out.printf("[%d] %s%n", i + 1, subjects[i]);
+            System.out.println("[0] Finish updating grades");
 
-        double grade;
-        while (true) {
-            System.out.print("Grade (0-100): ");
-            try {
-                grade = Double.parseDouble(sc.nextLine());
-                if (grade < 0 || grade > 100) throw new NumberFormatException();
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid grade. Must be 0-100.");
+            int subjChoice;
+            while (true) {
+                System.out.print("Choose subject (number): ");
+                try {
+                    subjChoice = Integer.parseInt(sc.nextLine());
+                    if (subjChoice < 0 || subjChoice > subjects.length)
+                        throw new NumberFormatException();
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid choice.");
+                }
             }
-        }
 
-        s.setGrade(subject, grade);
-        System.out.printf("Grade updated: %s - %.2f%n", subject, grade);
+            if (subjChoice == 0) {
+                System.out.println("Finished updating grades for " + s.getName());
+                break;
+            }
+
+            String subject = subjects[subjChoice - 1];
+
+            double grade;
+            while (true) {
+                System.out.print("Grade for " + subject + " (0-100): ");
+                try {
+                    grade = Double.parseDouble(sc.nextLine());
+                    if (grade < 0 || grade > 100) throw new NumberFormatException();
+                    break;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid grade. Must be 0-100.");
+                }
+            }
+
+            s.setGrade(subject, grade);
+            System.out.printf("Grade updated: %s - %.2f%n", subject, grade);
+        }
     }
 
     public static void deleteStudent(GradeService service, Scanner sc) {
