@@ -16,10 +16,11 @@ public class GradeSystem {
     private static AuthService auth = new AuthService();
     private static GradeService gradeService = new GradeService();
 
+    private static final String[] subjects = {"Math", "Science", "English", "History", "PE"};
+
     public static void main(String[] args) {
         System.out.println("=== Grade Recording System ===");
 
-        // Load existing data
         gradeService.loadFromFile();
 
         while (true) {
@@ -35,7 +36,7 @@ public class GradeSystem {
                     System.out.println("Goodbye!"); 
                     System.exit(0); 
                 }
-                default -> System.out.println("❌ Invalid choice.");
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
@@ -46,13 +47,12 @@ public class GradeSystem {
         String password = readPassword("Password: ");
 
         if (!auth.login(username, password)) {
-            System.out.println("❌ Invalid credentials.");
+            System.out.println("Invalid credentials.");
             return;
         }
 
-        System.out.println("✅ Logged in as " + username);
+        System.out.println("Logged in as " + username);
 
-        // Decide user type
         if (username.toLowerCase().startsWith("admin")) {
             new Admin(username, password, gradeService, sc).viewMenu();
         } else {
@@ -66,18 +66,17 @@ public class GradeSystem {
         String password = readPassword("Password: ");
 
         if (username.isEmpty() || password.isEmpty()) {
-            System.out.println("❌ Username/password cannot be empty.");
+            System.out.println("Username/password cannot be empty.");
             return;
         }
 
         if (auth.register(username, password)) {
-            System.out.println("✅ Registration successful!");
+            System.out.println("Registration successful!");
         } else {
-            System.out.println("❌ Username already exists.");
+            System.out.println("Username already exists.");
         }
     }
 
-    // Hide password if terminal supports it
     public static String readPassword(String prompt) {
         Console console = System.console();
         if (console != null) {
@@ -88,7 +87,6 @@ public class GradeSystem {
         }
     }
 
-    // Input validation
     public static int getValidInt(String msg, Scanner sc) {
         while (true) {
             System.out.print(msg);
@@ -96,7 +94,7 @@ public class GradeSystem {
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid number. Try again.");
+                System.out.println("Invalid number. Try again.");
             }
         }
     }
@@ -106,14 +104,14 @@ public class GradeSystem {
         System.out.print("Student ID: ");
         String id = sc.nextLine().trim();
         if (service.findById(id) != null) {
-            System.out.println("❌ Student ID already exists.");
+            System.out.println("Student ID already exists.");
             return;
         }
         System.out.print("Student Name: ");
         String name = sc.nextLine().trim();
         StudentRecord s = new StudentRecord(id, name);
         service.addStudent(s);
-        System.out.println("✅ Student added.");
+        System.out.println("Student added.");
     }
 
     public static void viewAllStudents(GradeService service) {
@@ -121,20 +119,48 @@ public class GradeSystem {
             System.out.println("No students yet.");
             return;
         }
-        for (StudentRecord s : service.getAll()) System.out.println(s);
+        System.out.println("=== Students List ===");
+        for (StudentRecord s : service.getAll())
+            System.out.printf("ID: %s | Name: %s%n", s.getId(), s.getName());
     }
 
     public static void addOrUpdateGrade(GradeService service, Scanner sc) {
-        System.out.print("Student ID: ");
+        if (service.getAll().isEmpty()) {
+            System.out.println("No students available. Add students first.");
+            return;
+        }
+
+        // Show students
+        System.out.println("=== Students List ===");
+        for (StudentRecord s : service.getAll())
+            System.out.printf("ID: %s | Name: %s%n", s.getId(), s.getName());
+
+        System.out.print("Enter Student ID to add/update grade: ");
         String id = sc.nextLine().trim();
         StudentRecord s = service.findById(id);
         if (s == null) { 
-            System.out.println("❌ Student not found."); 
+            System.out.println("Student not found."); 
             return; 
         }
 
-        System.out.print("Subject: ");
-        String subject = sc.nextLine().trim();
+        // Show subjects
+        System.out.println("=== Subjects ===");
+        for (int i = 0; i < subjects.length; i++)
+            System.out.printf("[%d] %s%n", i + 1, subjects[i]);
+
+        int subjChoice;
+        while (true) {
+            System.out.print("Choose subject (number): ");
+            try {
+                subjChoice = Integer.parseInt(sc.nextLine());
+                if (subjChoice < 1 || subjChoice > subjects.length) throw new NumberFormatException();
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid choice.");
+            }
+        }
+        String subject = subjects[subjChoice - 1];
+
         double grade;
         while (true) {
             System.out.print("Grade (0-100): ");
@@ -143,23 +169,24 @@ public class GradeSystem {
                 if (grade < 0 || grade > 100) throw new NumberFormatException();
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("❌ Invalid grade. Must be 0-100.");
+                System.out.println("Invalid grade. Must be 0-100.");
             }
         }
+
         s.setGrade(subject, grade);
-        System.out.println("✅ Grade updated.");
+        System.out.printf("Grade updated: %s - %.2f%n", subject, grade);
     }
 
     public static void deleteStudent(GradeService service, Scanner sc) {
         System.out.print("Student ID: ");
         String id = sc.nextLine().trim();
-        if (service.deleteById(id)) System.out.println("✅ Student deleted.");
-        else System.out.println("❌ Student not found.");
+        if (service.deleteById(id)) System.out.println("Student deleted.");
+        else System.out.println("Student not found.");
     }
 
     public static void showStatisticsMenu(GradeService service, Scanner sc) {
         if (service.getAll().isEmpty()) {
-            System.out.println("❌ No students to compute statistics.");
+            System.out.println("No students to compute statistics.");
             return;
         }
         while (true) {
@@ -177,7 +204,7 @@ public class GradeSystem {
                 case 3 -> service.printStudentAverages();
                 case 4 -> service.printSubjectAverages();
                 case 5 -> { return; }
-                default -> System.out.println("❌ Invalid choice.");
+                default -> System.out.println("Invalid choice.");
             }
         }
     }

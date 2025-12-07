@@ -44,7 +44,7 @@ public class Admin extends User {
                 case 6 -> gradeService.saveToFile();
                 case 7 -> { gradeService.loadFromFile(); System.out.println("✅ Data loaded."); }
                 case 8 -> { System.out.println("Logging out..."); return; }
-                default -> System.out.println("❌ Invalid choice.");
+                default -> System.out.println("Invalid choice.");
             }
         }
     }

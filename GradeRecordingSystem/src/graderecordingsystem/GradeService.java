@@ -35,7 +35,7 @@ public class GradeService {
             for (StudentRecord s : students) {
                 bw.write(s.serialize()); bw.newLine();
             }
-            System.out.println("✅ Data saved.");
+            System.out.println("Data saved.");
         } catch (IOException e) { System.out.println("Error: " + e.getMessage()); }
     }
 

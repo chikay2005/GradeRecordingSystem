@@ -32,16 +32,19 @@ public class StudentUser extends User {
             switch (choice) {
                 case 1 -> {
                     StudentRecord s = gradeService.findById(username);
-                    if (s != null) System.out.println(s);
-                    else System.out.println("❌ No record found.");
+                    if (s != null) {
+                        System.out.println(s);
+                    } else {
+                        System.out.println("No record found.");
+                    }
                 }
                 case 2 -> {
                     StudentRecord s = gradeService.findById(username);
                     if (s != null) System.out.printf("Average: %.2f%n", s.computeAverage());
-                    else System.out.println("❌ No record found.");
+                    else System.out.println("No record found.");
                 }
                 case 3 -> { System.out.println("Logging out..."); return; }
-                default -> System.out.println("❌ Invalid choice.");
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
